@@ -29,23 +29,34 @@ setup_worktree() {
   #── Sanity check ─────────────────────────
   if [[ -z "${base_branch:-}" || -z "${trunk_branch:-}" || "${#add_branches[@]}" -eq 0 ]]; then
     cat <<EOF >&2
-${RED}❌ Missing required arguments${NC}
+  ${RED}❌ Missing required arguments${NC}
 
-You must supply:
-  • ${YELLOW}--base <case/branch>${NC}    – the name of the case branch (e.g. case/c3900)
-  • ${YELLOW}--trunk <trunk-branch>${NC} – the upstream branch to start from (e.g. develop)
-  • ${YELLOW}--add <feature-branch>${NC} – at least one feature branch to merge
+  You must supply:
+    • ${YELLOW}--base <case/branch>${NC}    – the name of the case branch (e.g. case/c3900)
+    • ${YELLOW}--trunk <trunk-branch>${NC} – the upstream branch to start from (e.g. develop)
+    • ${YELLOW}--add <feature-branch>${NC} – at least one feature branch to merge
 
-Example:
-  setup_worktree \\
-    --base  case/c3900   \\
-    --trunk develop      \\
-    --add   feature/foo  \\
-    --add   feature/bar
+  Example:
+    setup_worktree \\
+      --base  case/c3900   \\
+      --trunk develop      \\
+      --add   feature/foo  \\
+      --add   feature/bar
 
 EOF
     return 1
   fi
+
+
+  # If python3 not present in the venv location, error
+  if [[ ! -f "${VENV}/${base_branch}/bin/python3" ]]; then
+    echo -e "${RED}❌ venv missing: ${VENV}/${base_branch}/bin/python3${NC}"
+    return 1
+  fi
+
+  source "${VENV}/${base_branch}/bin/activate"
+
+  cd ${EFFORTS}/submarine/develop
 
   #── Ensure we’re in a Git repository ─────
   if ! git rev-parse --is-inside-work-tree &>/dev/null; then
@@ -59,7 +70,7 @@ EOF
   parent_dir=$(dirname "$repo_root")
 
   #── Derive worktree path ───────────────
-  local worktree_folder="${base_branch//\//-}"    # case/c3900 → case-c3900
+  local worktree_folder="${base_branch}"
   local wt_path="${parent_dir}/${worktree_folder}"
 
   #── Prevent self-deletion ──────────────
