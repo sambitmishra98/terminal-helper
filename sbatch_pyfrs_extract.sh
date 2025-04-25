@@ -130,3 +130,38 @@ else
   echo "This file is meant to be sourced, not executed directly." >&2
   exit 1
 fi
+
+#-------------------------------------------------------------------------------
+# extract_all_pyfrs_to_csv_rec: Recursively scan for <pattern> and append stats
+#-------------------------------------------------------------------------------
+# Usage:
+#   extract_all_pyfrs_to_csv_rec <directory> <glob-pattern> <output.csv> <keys...>
+#
+# Example:
+#   extract_all_pyfrs_to_csv_rec \
+#     /mnt/.../NUMA-wait \
+#     '*.pyfrs' \
+#     stats.csv \
+#     wall-time \
+#     rhs-graph-0-send-median \
+#     rhs-graph-1-send-median
+#-------------------------------------------------------------------------------
+extract_all_pyfrs_to_csv_rec() {
+  local dir="$1"
+  local pattern="$2"
+  local csv="$3"
+  shift 3
+  local keys=("$@")
+
+  # sanity
+  if [[ ! -d "$dir" ]]; then
+    echo "[ERROR] '$dir' is not a directory" >&2
+    return 1
+  fi
+  mkdir -p "$(dirname "$csv")"
+
+  # find + sort to get a deterministic order
+  find "$dir" -type f -name "$pattern" | sort | while read -r file; do
+    extract_pyfrs_stats_to_csv "$file" "$csv" "${keys[@]}"
+  done
+}
