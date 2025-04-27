@@ -32,8 +32,8 @@ setup_worktree() {
   ${RED}❌ Missing required arguments${NC}
 
   You must supply:
-    • ${YELLOW}--base <case/branch>${NC}    – the name of the case branch (e.g. case/c3900)
-    • ${YELLOW}--trunk <trunk-branch>${NC} – the upstream branch to start from (e.g. develop)
+    • ${YELLOW}--base <case/branch>${NC}   – name of case branch (case-c200)
+    • ${YELLOW}--trunk <trunk-branch>${NC} – upstream branch (develop)
     • ${YELLOW}--add <feature-branch>${NC} – at least one feature branch to merge
 
   Example:
@@ -47,16 +47,14 @@ EOF
     return 1
   fi
 
-
   # If python3 not present in the venv location, error
-  if [[ ! -f "${VENV}/${base_branch}/bin/python3" ]]; then
-    echo -e "${RED}❌ venv missing: ${VENV}/${base_branch}/bin/python3${NC}"
+  if [[ ! -f "${VENVS}/${base_branch}/bin/python3" ]]; then
+    echo -e "${RED}❌ venv missing: ${VENVS}/${base_branch}/bin/python3${NC}"
     return 1
   fi
 
-  source "${VENV}/${base_branch}/bin/activate"
 
-  cd ${EFFORTS}/submarine/develop
+  cd ${SAMBITMISHRA98_PYFR}/develop
 
   #── Ensure we’re in a Git repository ─────
   if ! git rev-parse --is-inside-work-tree &>/dev/null; then
@@ -107,4 +105,10 @@ EOF
   #── Done ────────────────────────────────
   echo
   echo -e "${GREEN}✅ ${base_branch} is now: ${trunk_branch} + ${add_branches[*]}${NC}"
+  source "${VENVS}/${base_branch}/bin/activate"
+
+  cd ${SAMBITMISHRA98_PYFR}/${base_branch}
+
+  python3 setup.py develop
+
 }
