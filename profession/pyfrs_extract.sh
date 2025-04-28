@@ -122,16 +122,6 @@ extract_pyfrs_stats_to_csv() {
 }
 
 #-------------------------------------------------------------------------------
-# Initialization: check deps when sourced
-#-------------------------------------------------------------------------------
-if [ "${BASH_SOURCE[0]}" != "\$0" ]; then
-  check_dependencies
-else
-  echo "This file is meant to be sourced, not executed directly." >&2
-  exit 1
-fi
-
-#-------------------------------------------------------------------------------
 # extract_all_pyfrs_to_csv_rec: Recursively scan for <pattern> and append stats
 #-------------------------------------------------------------------------------
 # Usage:
@@ -165,3 +155,13 @@ extract_all_pyfrs_to_csv_rec() {
     extract_pyfrs_stats_to_csv "$file" "$csv" "${keys[@]}"
   done
 }
+
+#-------------------------------------------------------------------------------
+# Initialization: check deps when sourced
+#-------------------------------------------------------------------------------
+if [ "${BASH_SOURCE[0]}" != "\$0" ]; then
+  check_dependencies
+else
+  echo "This file is meant to be sourced, not executed directly." >&2
+  exit 1
+fi
