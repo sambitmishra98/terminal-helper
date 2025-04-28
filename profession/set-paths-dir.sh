@@ -6,7 +6,7 @@
 
 # Verify that the scratch directory exists
 
-setup_paths() 
+set_paths() 
 {
     SCRATCH="${1:-$SCRATCH}"
 
@@ -26,15 +26,19 @@ setup_paths()
     export SAMBITMISHRA98_PYFR_DEVELOP="$SAMBITMISHRA98_PYFR/develop/"
     export LOCAL="$SCRATCH/.local/"
     export DOWNLOADS="$LOCAL/downloads/"
+    export EXTRACTS="$LOCAL/extracts/"
     export INSTALLS="$LOCAL/installs/"
+}
 
+check_paths()
+{
     for path in "$EFFORTS" \
                 "$VENVS" \
                 "$WORKSPACES" \
                 "$SUPPLEMENTARY" "$MESHES" "$PARTITIONS" \
                 "$GITHUB" "$SAMBITMISHRA98" \
                 "$PYFR_BRANCHES" "$SAMBITMISHRA98_PYFR" \
-                "$LOCAL" "$DOWNLOADS" "$INSTALLS"; do
+                "$LOCAL" "$DOWNLOADS" "$EXTRACTS" "$INSTALLS"; do
         if [ -d "${path}" ] ; then echo -e "\e[1;32m Exists: \e[0m ${path}"
         else                       echo -e "\e[1;31m Doesn't exist: \e[0m ${path}"
         fi
@@ -53,7 +57,7 @@ create_paths()
                 "$SUPPLEMENTARY" "$MESHES" "$PARTITIONS" \
                 "$GITHUB" "$SAMBITMISHRA98" \
                 "$PYFR_BRANCHES" "$SAMBITMISHRA98_PYFR" \
-                "$LOCAL" "$DOWNLOADS" "$INSTALLS"; do
+                "$LOCAL" "$DOWNLOADS" "$EXTRACTS" "$INSTALLS"; do
         if [ ! -d "${path}" ]; then
             mkdir -p "${path}"
             echo -e "\e[1;32m Directory created: \e[0m ${path}"
@@ -83,21 +87,6 @@ print_paths()
     echo -e "   │   └─ SAMBITMISHRA98_PYFR_DEVELOP: $SAMBITMISHRA98_PYFR_DEVELOP"
     echo -e "   └─ LOCAL:                           $LOCAL"
     echo -e "       ├─ DOWNLOADS:                   $DOWNLOADS"
+    echo -e "       └─ EXTRACTS:                    $EXTRACTS"
     echo -e "       └─ INSTALLS:                    $INSTALLS"
 }
-
-print_libraries_versions()
-{
-    echo -e "\e[1;32m--------------------\e[0m"
-    echo -e "\e[1;32mLibrary paths:\e[0m"
-    echo -e "\e[1;32m--------------------\e[0m"
-}
-
-print_pyfr_extra_functionality_paths()
-{
-    echo -e "\e[1;32m--------------------\e[0m"
-    echo -e "\e[1;32mPyFR extra functionality paths:\e[0m"
-    echo -e "\e[1;32m--------------------\e[0m"
-
-}
-
