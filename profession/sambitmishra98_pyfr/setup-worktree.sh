@@ -9,6 +9,7 @@
 #     --add   feature/foo \
 #     --add   feature/bar
 
+
 setup_worktree() {
   #── Colours ─────────────────────────────
   local RED='\e[31m' GREEN='\e[32m' YELLOW='\e[33m' BLUE='\e[34m' NC='\e[0m'
@@ -111,4 +112,58 @@ EOF
 
   python3 setup.py develop
 
+}
+
+setup_worktree_testbed() {
+    local RED='\e[31m' GREEN='\e[32m' YELLOW='\e[33m' BLUE='\e[34m' NC='\e[0m'
+
+    local caseloc=$(basename "$PWD")
+
+    # Save the current directory
+    local current_dir=$(pwd)
+
+
+    # Ensure we’re in testbed-<casename>
+    if [[ ! $caseloc =~ ^testbed- ]]; then
+        echo -e "${RED}ERROR: This script must be run from a testbed directory.${NC}"
+        echo -e "${YELLOW}Example: cd /scratch/EFFORTS/submarine/testbed-c200${NC}"
+    fi
+
+    local casename=${caseloc#testbed-}
+    if [ -z "$casename" ]; then
+        echo "Error: casename is not set."
+    fi
+
+    # Use passed-in feature names or fall back to defaults
+    local features=("$@")
+    if [ ${#features[@]} -eq 0 ]; then
+      echo "Error: No feature names provided."
+      echo "Usage: setup_worktree_in_testbed <feature1> <feature2> ..."
+      echo "Example: setup_worktree_in_testbed pseudodt-writer pseudodt-stats"
+    fi
+
+    # Construct --add arguments
+    local add_args=()
+    for feat in "${features[@]}"; do
+        add_args+=(--add "feature/$feat")
+    done
+
+    # Invoke setup_worktree and cd into testbed
+    setup_worktree --base "worktree-${casename}" --trunk develop "${add_args[@]}"
+    cd $current_dir
+
+
+    # Grab the venv name (e.g. “worktree-c200”)
+    venv_name=$(basename "${VIRTUAL_ENV:-}")
+
+    # Find where pip installed pyfr, then grab its leaf directory
+    pyfr_loc=$(pip3 show pyfr | awk '/^Location:/{print $2}')
+    branch_name=$(basename "$pyfr_loc")
+
+    # Compare and fail if they differ
+    if [ "$branch_name" != "$venv_name" ]; then
+      >&2 echo "ERROR: Active venv is '$venv_name' but PyFR is loaded from '$branch_name'"
+    else
+      echo -e "${GREEN}✓ Active venv is '$venv_name' and PyFR is loaded from '$branch_name'${NC}"
+    fi
 }

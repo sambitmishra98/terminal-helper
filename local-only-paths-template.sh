@@ -15,3 +15,7 @@ export consciousness_ip="10.125.213.39"
 
 export dest_consciousness="$consciousness_user@$consciousness_ip:/scratch/.sync/dest_spitfire"
 export  src_consciousness="$consciousness_user@$consciousness_ip:/scratch/.sync/src_spitfire"
+
+## set up alias for pvpython and pvbatch
+alias pvpython="~/pvpython"
+alias pvbatch="~/pvbatch"

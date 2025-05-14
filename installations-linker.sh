@@ -19,3 +19,13 @@ add_installation_to_path() {
         [ -d "${install_dir}/lib/pkgconfig" ] && export PKG_CONFIG_PATH="${install_dir}/lib/pkgconfig:$PKG_CONFIG_PATH"
     fi 
 }
+
+remove_all_installation_paths(){
+    PATH=/home/sambit/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin
+    unset CPATH
+    unset CPPATH
+    unset LDPATH
+    unset LIBRARY_PATH
+    unset LD_LIBRARY_PATH
+    unset PKG_CONFIG_PATH
+}
