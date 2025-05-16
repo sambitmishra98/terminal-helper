@@ -1,140 +1,124 @@
 #!/usr/bin/env bash
-set -euo pipefail
-
-#––––––––––––––––––––––––––––––––––––––––––––––––––––––
-# 0. User-configurable paths & jobs
-#––––––––––––––––––––––––––––––––––––––––––––––––––––––
-: "${DOWNLOADS:=$HOME/downloads}"
-: "${EXTRACTS:=$HOME/extracts}"
-: "${INSTALLS:=$HOME/installs}"
-: "${MAKE_JOBS:=$(nproc)}"
 
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––
 # 1. Version
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––
-set_python_version() {
-    PYTHON_VER="${PYTHON_VER:-3.13.3}"
-    echo "[INFO] Setting Python version to $PYTHON_VER"
+set_libffi_version() {
+    LIBFFI_VER="${LIBFFI_VER:-3.4.8}"
+    echo "[INFO] Setting libffi version to $LIBFFI_VER"
 }
 
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––
 # 2. Download
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––
-download_python() {
-    local log="$DOWNLOADS/python/$PYTHON_VER/download.log"
-    mkdir -p "$DOWNLOADS/python/$PYTHON_VER"
-    echo "[INFO] Downloading Python v$PYTHON_VER to $DOWNLOADS/python/$PYTHON_VER"
+download_libffi() {
+    local log="$DOWNLOADS/libffi/$LIBFFI_VER/download.log"
+    mkdir -p "$DOWNLOADS/libffi/$LIBFFI_VER"
+    echo "[INFO] Downloading libffi v$LIBFFI_VER to $DOWNLOADS/libffi/$LIBFFI_VER"
     wget -q --show-progress \
-         "https://www.python.org/ftp/python/$PYTHON_VER/Python-$PYTHON_VER.tgz" \
-         -O "$DOWNLOADS/python/$PYTHON_VER/Python-$PYTHON_VER.tgz" \
+         "https://github.com/libffi/libffi/releases/download/v$LIBFFI_VER/libffi-$LIBFFI_VER.tar.gz" \
+         -O "$DOWNLOADS/libffi/$LIBFFI_VER/libffi-$LIBFFI_VER.tar.gz" \
          2>&1 | tee "$log"
 
     if grep -qi "error" "$log"; then
         echo "[ERROR] Download failed; see $log"
         return 1
     else
-        echo "[OK] Python download completed"
+        echo "[OK] libffi download completed"
     fi
 }
 
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––
 # 3. Extract
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––
-extract_python() {
-    local src_dir="$DOWNLOADS/python/$PYTHON_VER"
+extract_libffi() {
+    local src_dir="$DOWNLOADS/libffi/$LIBFFI_VER"
     local log="$src_dir/extract.log"
 
-    echo "[INFO] Extracting Python tarball to $EXTRACTS/python/$PYTHON_VER/"
-    mkdir -p "$EXTRACTS/python/$PYTHON_VER"
-    tar -xzf "$src_dir/Python-$PYTHON_VER.tgz" \
-        -C "$EXTRACTS/python/$PYTHON_VER" \
+    echo "[INFO] Extracting libffi tarball to $EXTRACTS/libffi/$LIBFFI_VER/"
+    mkdir -p "$EXTRACTS/libffi/$LIBFFI_VER"
+    tar -xzf "$src_dir/libffi-$LIBFFI_VER.tar.gz" \
+        -C "$EXTRACTS/libffi/$LIBFFI_VER" \
         --strip-components=1 \
         2>&1 | tee "$log"
 
-    if [ ! -d "$EXTRACTS/python/$PYTHON_VER" ]; then
+    if [ ! -d "$EXTRACTS/libffi/$LIBFFI_VER" ]; then
         echo "[ERROR] Extraction failed; directory missing"
         return 1
     else
-        echo "[OK] Python extracted successfully"
+        echo "[OK] libffi extracted successfully"
     fi
 }
 
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––
 # 4. Configure
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––
-configure_python() {
-    local src="$EXTRACTS/python/$PYTHON_VER"
+configure_libffi() {
+    local src="$EXTRACTS/libffi/$LIBFFI_VER"
     local log="$src/configure.log"
-    local openssl_dir="$INSTALLS/openssl/${OPENSSL_VER:-1.1.1w}"
 
     cd "$src" || { echo "[ERROR] Cannot cd to $src"; return 1; }
-    echo "[INFO] Configuring Python..."
-    ./configure --prefix="$INSTALLS/python/$PYTHON_VER" \
-                --enable-shared \
-                --with-openssl="$openssl_dir" \
-                --enable-optimizations \
+    echo "[INFO] Configuring libffi..."
+    ./configure \
+        --prefix="$INSTALLS/libffi/$LIBFFI_VER" 
         2>&1 | tee "$log"
+
+    if grep -q "error" "$log"; then
+        echo "[ERROR] Configuration errors detected; see $log"
+        return 1
+    else
+        echo "[OK] libffi configured successfully"
+    fi
 }
 
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––
 # 5. Build
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––
-build_python() {
-    local src="$EXTRACTS/python/$PYTHON_VER"
+build_libffi() {
+    local src="$EXTRACTS/libffi/$LIBFFI_VER"
     local log="$src/make.log"
 
     cd "$src" || { echo "[ERROR] Cannot cd to $src"; return 1; }
-    echo "[INFO] Building Python..."
+    echo "[INFO] Building libffi..."
     make clean 2>/dev/null || true
-    make -j"$MAKE_JOBS" 2>&1 | tee "$log"
+    make -j 24 2>&1 | tee "$log"
 
+    if grep -q "error" "$log"; then
+        echo "[ERROR] Build errors detected; see $log"
+        return 1
+    else
+        echo "[OK] libffi build succeeded"
+    fi
 }
 
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––
 # 6. Install
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––
-install_python() {
-    local src="$EXTRACTS/python/$PYTHON_VER"
+install_libffi() {
+    local src="$EXTRACTS/libffi/$LIBFFI_VER"
     local log="$src/install.log"
 
     cd "$src" || { echo "[ERROR] Cannot cd to $src"; return 1; }
-    echo "[INFO] Installing Python..."
+    echo "[INFO] Installing libffi..."
     make install 2>&1 | tee "$log"
 
-    if [ -x "$INSTALLS/python/$PYTHON_VER/bin/python3" ]; then
-        echo "[OK] Python installed at $INSTALLS/python/$PYTHON_VER"
+    if [ -f "$INSTALLS/libffi/$LIBFFI_VER/lib64/libffi.so" ]; then
+        echo "[OK] libffi installed at $INSTALLS/libffi/$LIBFFI_VER"
     else
-        echo "[ERROR] Installation failed; python3 missing"
+        echo "[ERROR] Installation failed; libffi.so missing"
         return 1
     fi
-}
-
-#––––––––––––––––––––––––––––––––––––––––––––––––––––––
-# 7. Verify
-#––––––––––––––––––––––––––––––––––––––––––––––––––––––
-check_python() {
-    local prefix="$INSTALLS/python/$PYTHON_VER"
-    local log="$prefix/check.log"
-
-    echo "=== Python Installation Check ===" | tee "$log"
-    echo "[INFO] Binaries:" | tee -a "$log"
-    ls "$prefix/bin/" | tee -a "$log"
-
-    echo "[INFO] Shared libs:" | tee -a "$log"
-    ls "$prefix/lib/" | tee -a "$log"
-    echo "[OK] Verification complete ⇒ $log"
 }
 
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––
 # Main
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––
 main() {
-    set_python_version
-    download_python
-    extract_python
-    configure_python
-    build_python
-    install_python
-    check_python
-    echo "[ALL DONE] Python v$PYTHON_VER is ready under $INSTALLS/python/$PYTHON_VER"
+    set_libffi_version
+    download_libffi
+    extract_libffi
+    configure_libffi
+    build_libffi
+    install_libffi
+    echo "[ALL DONE] libffi v$LIBFFI_VER is ready under $INSTALLS/libffi/$LIBFFI_VER"
 }

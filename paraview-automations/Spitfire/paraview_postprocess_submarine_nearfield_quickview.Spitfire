@@ -1,0 +1,26 @@
+#!/bin/bash
+#SBATCH -J "pv"
+#SBATCH --ntasks=24
+#SBATCH --nodes=1
+#SBATCH --exclusive
+#SBATCH --use-min-nodes
+#SBATCH --time=7-00:00:00
+#SBATCH --output=p4/J%j_c2.out
+#SBATCH --no-requeue
+#SBATCH --partition=amd
+#SBATCH --cpus-per-gpu=4
+#SBATCH --mem=50G
+#SBATCH --nodelist=spitfire-ng29
+
+source /mnt/share/sambit98/EFFORTS/submarine/testbed-submarine/configs-and-scripts/setup_environment_ng29.sh
+
+echo "Running in dir: $(pwd)"
+
+# Get command line inputs
+export meshf="$1"
+export solnf="$2"
+export  vtuf="$3"
+
+pyfr export volume $meshf $solnf $vtuf
+
+pvpython /mnt/share/sambit98/.github/sambitmishra98/terminal-helper/paraview-automations/submarine_neafield_quickview.py $vtuf
