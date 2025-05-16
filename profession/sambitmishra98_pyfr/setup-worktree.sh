@@ -86,10 +86,19 @@ EOF
   git fetch origin "$trunk_branch"
 
   #── 2) (Re)create the worktree ──────────
-  echo -e "${BLUE}Recreating worktree '${wt_path}' from origin/${trunk_branch}…${NC}"
-  git worktree remove "$wt_path" 2>/dev/null || true
+  echo -e "${BLUE}Pruning any existing worktree at '${wt_path}'…${NC}"
+  # remove the worktree registration (force in case it’s still busy)
+  git worktree remove --force "$wt_path" 2>/dev/null || true
+  # garbage-collect any stray entries
+  git worktree prune --expire=now 2>/dev/null || true
+  # remove the directory itself
   rm -rf "$wt_path"
-  git worktree add "$wt_path" origin/"$trunk_branch" -B "$base_branch"
+
+  echo -e "${BLUE}Creating fresh worktree '${wt_path}' from origin/${trunk_branch}…${NC}"
+  if ! git worktree add "$wt_path" origin/"$trunk_branch" -B "$base_branch"; then
+    echo -e "${RED}❌ Failed to add worktree – aborting${NC}"
+    return 1
+  fi
   echo -e "${GREEN}✓ Worktree ready at ${wt_path}${NC}"
 
   #── 3) Merge each feature in order ──────
@@ -99,7 +108,21 @@ EOF
   for feat in "${add_branches[@]}"; do
     echo -e "  ${YELLOW}→${NC} Merging ${feat} into ${base_branch}…"
     git fetch origin "$feat"
+
+
     git merge --no-ff --no-edit origin/"$feat"
+
+
+
+#     if ! git merge --no-ff --no-edit origin/"$feat"; then
+#       echo -e "${RED}❌ Merge conflict in ${feat}. Aborting further merges.${NC}"
+#       popd >/dev/null
+#       return 1
+#     fi
+
+
+
+
   done
   popd >/dev/null
 
