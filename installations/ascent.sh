@@ -72,16 +72,6 @@ check_ascent() {
     fi
 }
 
-# ### Add Ascent and some of its dependencies to path
-# ```
-# export ASCENT_INSTALLATION_LOCATION=/scratch/user/u.sm121949/.downloads/git/ascent
-# add_installation_to_path "conduit-v0.9.1" "" "$ASCENT_INSTALLATION_LOCATION/scripts/build_ascent/install/"
-# add_installation_to_path "vtk-m-v2.1.0" "" "$ASCENT_INSTALLATION_LOCATION/scripts/build_ascent/install/"
-# 
-# export PYFR_ASCENT_MPI_LIBRARY_PATH=$ASCENT_INSTALLATION_LOCATION/scripts/build_ascent/install/ascent-develop/lib/libascent_mpi.so
-# ```
-
-
 #— Add Ascent and its dependencies to your environment —#
 # export ASCENT_REF="develop"
 # add_installation_to_path "conduit-vx.x.x" "" "${INSTALLS}/ascent/${ASCENT_REF}/scripts/build_ascent/install/"
