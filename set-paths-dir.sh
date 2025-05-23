@@ -8,7 +8,7 @@
 
 set_paths() 
 {
-    SCRATCH="${1:-$SCRATCH}"
+    SCRATCH="${1}"
 
     if [   -z "$SCRATCH" ]; then echo -e "\e[31m ERROR: scratch directory not set! \e[0m" ; exit 1 ; fi
     if [ ! -d "$SCRATCH" ]; then echo -e "\e[31m ERROR: $SCRATCH does not exist! \e[0m"   ; exit 1 ; fi
@@ -67,6 +67,8 @@ create_paths()
 
 print_paths() 
 {
+
+
     # Display essential variables
     echo -e "\e[1;32m--------------------\e[0m"
     echo -e "\e[1;32mEssential variables:\e[0m"
@@ -89,4 +91,5 @@ print_paths()
     echo -e "       ├─ DOWNLOADS:                   $DOWNLOADS"
     echo -e "       └─ EXTRACTS:                    $EXTRACTS"
     echo -e "       └─ INSTALLS:                    $INSTALLS"
+    echo -e "\e[1;32m--------------------\e[0m"
 }
