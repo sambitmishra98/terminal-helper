@@ -39,7 +39,8 @@ add_installation_to_path() {
             # Front-fill with spaces so all names are aligned
             local name_length=${#name}
             local spaces=$(( 15 - name_length ))
-            local spaces_string=$(printf "%${spaces}s" " ")
+            local spaces_string
+            spaces_string=$(printf "%${spaces}s" " ")
             spaces_string=${spaces_string// / }
 
             # echo -e "\e[32mAdded path to ${spaces_string} ${version} \e[0m"
