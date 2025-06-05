@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+
+# Helper: adjust PATH and related variables for installed packages
+# Usage: source installations-linker.sh
+# Requires: none (adds paths based on arguments)
+
 add_installation_to_path() {
     local name=$1
     local version=$2

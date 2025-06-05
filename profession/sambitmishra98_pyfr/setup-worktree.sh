@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# Helper: create PyFR Git worktrees with feature merges
+# Usage: source setup-worktree.sh and call setup_worktree
+# Requires: VENVS and SAMBITMISHRA98_PYFR variables
+
 #
 # Place this in your ~/.bashrc or source it at the top of your script.
 #

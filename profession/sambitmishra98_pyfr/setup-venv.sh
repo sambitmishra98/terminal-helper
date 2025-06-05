@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# Helper: bootstrap a PyFR virtual environment and clone
+# Usage: source setup-venv.sh then call setup_pyfr_venv <type> <name>
+# Requires: VENVS and SAMBITMISHRA98_PYFR variables
+
 ###############################################################################
 # setup_pyfr_venv <venv-type> <venv-name>
 # Creates (or re-uses) a Python virtual-environment and a *matching* PyFR clone
