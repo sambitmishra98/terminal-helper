@@ -7,7 +7,8 @@
 # THIS IS A TEMPLATE ONLY.
 
 # Call this file from your ~/.bashrc or other shell rc file after you have
-# copied it locally.
+# copied it locally. Keep the customised copy outside of version control
+# and simply source it from your shell startup file.
 # Replace the placeholder values below with your own usernames, hostnames and
 # preferred scratch paths.
 # Examples are provided in the comments.

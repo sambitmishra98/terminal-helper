@@ -1,6 +1,13 @@
 # Terminal Helper
 *Handy shell utilities for quickly wiring up local paths, HPC scratch areas, and PyFR-specific tooling.*
 
+## Overview
+A collection of small Bash helpers for my day‑to‑day PyFR and cluster work.
+When coming back after a long break, skim the **Quick‑start** section below to
+recall the typical sourcing sequence. Each script is also summarised in the
+table under **Script reference**.
+
+
 ---
 
 ## Prerequisites
@@ -30,6 +37,7 @@ source terminal_addon.sh <repo-root>
 ---
 
 ## Script reference
+Use this table as a quick reminder of what each helper exposes and how to call it.
 
 | File (source it?)                       | Commands exposed / functions                | Inputs                                   | Outputs / exports                                                                 |
 |-----------------------------------------|----------------------------------------------|------------------------------------------|-----------------------------------------------------------------------------------|
