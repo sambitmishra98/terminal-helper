@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 get_gcc_pkg(){
     setup_base
     export_all_versions

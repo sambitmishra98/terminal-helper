@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #SBATCH -J "make"
 #SBATCH --ntasks=24
 #SBATCH --nodes=1

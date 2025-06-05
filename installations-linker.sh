@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 add_installation_to_path() {
     local name=$1
     local version=$2
