@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -eu
 #SBATCH -J "OSU-setup"
 #SBATCH --ntasks=64
 #SBATCH --nodes=2

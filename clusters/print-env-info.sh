@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -eu
 
 print_env_info() {
     mpi_tasks_per_node=$(echo "$SLURM_TASKS_PER_NODE" | sed -e 's/^\([0-9][0-9]*\).*$/\1/')
