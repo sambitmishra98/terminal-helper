@@ -3,6 +3,15 @@
 
 ---
 
+## Prerequisites
+
+* Bash shell (tested with bash 5.x)
+* Git and Python 3 available in your `PATH`
+* HPC modules (`module` command) if running on a cluster
+* A writable scratch directory for `set_paths`
+
+---
+
 ## Quick-start
 
 ~~~
@@ -48,4 +57,45 @@ bash terminal_addon.sh <repo-root>
 3. **Virtual-env sanity** – let `setup-venv.sh` create the environment; confirm `python -m pyfr --version` reports the expected commit.
 
 ---
+
+## Examples
+
+### set_paths
+
+~~~bash
+source set-paths-dir.sh
+set_paths "/scratch/$USER"
+create_paths    # make the folders if needed
+check_paths     # verify they exist
+~~~
+
+### add_installation_to_path
+
+~~~bash
+source installations-linker.sh
+add_installation_to_path mpich 4.3.0 "$INSTALLS"
+~~~
+
+### setup_worktree
+
+~~~bash
+source profession/sambitmishra98_pyfr/setup-worktree.sh
+setup_worktree --base case/c3900 --trunk develop --add feature/foo --add feature/bar
+~~~
+
+### Combining scripts on a cluster
+
+Cluster jobs typically load the module system and then source the helper scripts:
+
+~~~bash
+. /etc/profile.d/modules.sh
+source set-paths-dir.sh
+source installations-linker.sh
+set_paths "/scratch/$USER"
+add_installation_to_path mpich 4.3.0 "$INSTALLS"
+~~~
+
+All directory variables like `EFFORTS`, `VENVS` and `WORKSPACES` are derived from
+`$SCRATCH` as set by `set_paths`.
+
 
