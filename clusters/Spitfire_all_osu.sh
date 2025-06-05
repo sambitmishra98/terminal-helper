@@ -41,8 +41,8 @@ add_installation_to_path gcc  "12.3.0"   "$SCRATCH/.local-spitfire/pkg/"
 set_ucx_version
 set_mpich_version
 
-add_installation_to_path ucx-cuda $UCX_VER   "$INSTALLS"
-add_installation_to_path mpich    $MPICH_VER "$INSTALLS"
+add_installation_to_path ucx-cuda "$UCX_VER"   "$INSTALLS"
+add_installation_to_path mpich    "$MPICH_VER" "$INSTALLS"
 
 export UCX_WARN_UNUSED_ENV_VARS=n
 
