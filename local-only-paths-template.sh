@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # THIS IS A TEMPLATE ONLY.
 
 # Call this with .bashrc

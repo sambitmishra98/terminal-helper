@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #SBATCH -J "H1_scale"
 #SBATCH --ntasks=9
 #SBATCH --nodes=1
