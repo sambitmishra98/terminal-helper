@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 set_mpich_version() {
     MPICH_VER="4.3.0"
     echo "[INFO] Setting MPICH version to $MPICH_VER"

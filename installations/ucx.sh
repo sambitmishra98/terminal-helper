@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 set_ucx_version() {
     export UCX_VER="1.18.0"
     echo "[INFO] Setting UCX version to $UCX_VER"

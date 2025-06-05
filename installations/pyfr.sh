@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 setup_pyfr_venv_prerequisites(){
     setup_base
     export_all_versions

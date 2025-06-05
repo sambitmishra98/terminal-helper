@@ -98,4 +98,12 @@ add_installation_to_path mpich 4.3.0 "$INSTALLS"
 All directory variables like `EFFORTS`, `VENVS` and `WORKSPACES` are derived from
 `$SCRATCH` as set by `set_paths`.
 
+## Contributing
 
+Before committing changes, run `shellcheck` on all shell scripts:
+
+```
+shellcheck $(git ls-files '*.sh')
+```
+
+The GitHub Actions workflow will also verify this on every push.

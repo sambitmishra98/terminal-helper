@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 ###############################################################################
 #  OSU Micro-Benchmarks (OMB) helper functions
 #  Mirrors the UCX / MPICH style: version → download → extract → build
