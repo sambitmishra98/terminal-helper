@@ -1,4 +1,8 @@
 #!/bin/bash
+# Helper: print key SLURM environment details for diagnostics
+# Usage: source print-env-info.sh then call print_env_info
+# Requires: SLURM_JOB_NUM_NODES, SLURM_TASKS_PER_NODE variables
+
 
 print_env_info() {
     mpi_tasks_per_node=$(echo "$SLURM_TASKS_PER_NODE" | sed -e  's/^\([0-9][0-9]*\).*$/\1/')

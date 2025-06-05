@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# Helper: simplified rsync push/pull utilities
+# Usage: source sync.sh to use set_sync_paths/rsync_to_remote/rsync_to_local
+# Requires: LOCAL_NAME, REMOTE_NAME, RSYNC_HOST variables
+
 set -euo pipefail
 IFS=$'\n\t'
 

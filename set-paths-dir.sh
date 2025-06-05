@@ -1,4 +1,8 @@
 #!/bin/bash
+# Helper: manage directory tree for HPC scratch space
+# Usage: source set-paths-dir.sh and call set_paths <scratch_dir>
+# Requires: none
+
 
 # ------------------------------------------------------------------------------
 # Essential environment variables

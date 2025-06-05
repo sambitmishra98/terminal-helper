@@ -1,3 +1,7 @@
+# Helper: define local/remote path variables for rsync and HPC
+# Usage: source local-only-paths-template.sh from .bashrc
+# Requires: customise user/IP values
+
 # THIS IS A TEMPLATE ONLY.
 
 # Call this with .bashrc

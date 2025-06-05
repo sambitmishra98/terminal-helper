@@ -1,4 +1,8 @@
 #!/bin/bash
+# Helper: display library and PyFR additional paths
+# Usage: source set-paths-lib.sh
+# Requires: paths set by set_paths
+
 
 # ------------------------------------------------------------------------------
 # Essential environment variables

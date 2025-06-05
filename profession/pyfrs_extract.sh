@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# Helper: utilities for extracting metrics from .pyfrs files
+# Usage: source pyfrs_extract.sh to access functions
+# Requires: h5dump, realpath, grep, awk, tr
+
 #-------------------------------------------------------------------------------
 # extract_pyfrs_stats.sh
 #-------------------------------------------------------------------------------
