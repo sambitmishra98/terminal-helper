@@ -4,5 +4,15 @@
 # Usage: source terminal_addon.sh <repo-root>
 # Requires: environment variables from set_paths (e.g. VENVS)
 
-source "$1/profession/sambitmishra98_pyfr/setup-worktree.sh"
-source "$1/profession/sambitmishra98_pyfr/setup-venv.sh"
+
+# ── 1. argument guard ─────────────────────────────────────────────────────────
+if [ -z "$1" ]; then
+    echo "Usage: source terminal_addon.sh <repo-root>"
+    return 1                # abort early when sourced
+fi
+REPO_ROOT=$1
+
+# ── 2. core workspace bootstrap ───────────────────────────────────────────────
+source "$REPO_ROOT/profession/sambitmishra98_pyfr/setup-worktree.sh"
+source "$REPO_ROOT/profession/sambitmishra98_pyfr/setup-venv.sh"
+
