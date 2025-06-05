@@ -91,7 +91,8 @@ check_osu() {
 
     # results folder with date-stamp to avoid clobbering
     local results_root="$INSTALLS/osu/results"
-    local stamp=$(date +%Y-%m-%d_%H%M%S)
+    local stamp
+    stamp=$(date +%Y-%m-%d_%H%M%S)
     local results_dir="$results_root/$stamp"
     mkdir -p "$results_dir"
 
