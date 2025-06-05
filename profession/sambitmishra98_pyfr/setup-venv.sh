@@ -110,3 +110,54 @@ setup_pyfr_venv ()
 
     echo -e "${C_GREEN}=== PyFR virtual-env '${VENV_TYPE}-${VENV_NAME}' ready${C_RESET}"
 }
+
+###############################################################################
+# update_feature_branch  <branch> [remote]
+# Rebase the current feature branch (or <branch>) onto origin/develop
+# and publish the cleaned history with --force-with-lease.
+###############################################################################
+update_feature_branch () {
+    local br="${1:-$(git symbolic-ref --quiet --short HEAD)}"
+    local remote="${2:-origin}"
+
+    # Safety guard – must be on a feature/* branch
+    [[ "$br" =~ ^feature/ ]] || {
+        echo "Not a feature branch: $br"; return 1; }
+
+    # Always work from repo root
+    git rev-parse --show-toplevel &>/dev/null || return 1
+    cd "$(git rev-parse --show-toplevel)" || return 1
+
+    git config pull.rebase true
+    git config rebase.autoStash true
+
+    echo ">>> Fast-forwarding $remote/develop"
+    git fetch "$remote" &&
+    git switch develop &&
+    git pull --ff-only "$remote" develop       || return 1
+
+    echo ">>> Rebasing $br onto develop"
+    git switch "$br"                           || return 1
+    git rebase "$remote"/develop               || return 1
+
+    echo ">>> Publishing cleaned branch"
+    git push --force-with-lease "$remote" "$br"
+}
+
+###############################################################################
+# setup_pyfr_venv_with_deps <venv-type> <venv-name> <dep1> [dep2 …]
+###############################################################################
+setup_pyfr_venv_with_deps () {
+    local vtype="$1"; local vname="$2"; shift 2
+    local deps=("$@")
+
+    for dep in "${deps[@]}"; do
+        # ensure the dependent feature branch is clean / up-to-date
+        ( cd "${SAMBITMISHRA98_PYFR}/${vtype}-${dep}" 2>/dev/null && \
+          update_feature_branch "feature/${dep}" ) || true
+        setup_pyfr_venv "$vtype" "$dep"            || return 1
+    done
+
+    # finally create / reuse the requested venv
+    setup_pyfr_venv "$vtype" "$vname"
+}
