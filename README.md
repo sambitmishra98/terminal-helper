@@ -36,7 +36,7 @@ bash terminal_addon.sh <repo-root>
 ## Shell style
 
 * Scripts start with `#!/usr/bin/env bash`.
-* Executable files include `set -euo pipefail` after the shebang.
+* Executable files include `set -eu` after the shebang.
 * Quote variable expansions and use `$(( ... ))` for arithmetic.
 ---
 

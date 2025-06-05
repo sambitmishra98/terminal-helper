@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -eu
 #SBATCH -J "OSU-setup"
 #SBATCH --ntasks=64
 #SBATCH --nodes=2
