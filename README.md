@@ -49,3 +49,13 @@ bash terminal_addon.sh <repo-root>
 
 ---
 
+## Contributing
+
+Before committing changes, run `shellcheck` on all shell scripts:
+
+```
+shellcheck $(git ls-files '*.sh')
+```
+
+The GitHub Actions workflow will also verify this on every push.
+
