@@ -3,7 +3,6 @@
 # Usage: source sync.sh to use set_sync_paths/rsync_to_remote/rsync_to_local
 # Requires: LOCAL_NAME, REMOTE_NAME, RSYNC_HOST variables
 
-set -euo pipefail
 IFS=$'\n\t'
 
 # You can override these in your ~/.bashrc:

@@ -1,7 +1,8 @@
+#!/usr/bin/env bash
+
 # Helper: locate cubic mesh files by parameters
 # Usage: source cube-mesh-linker.sh then call setup_cube_mesh <etype> <order> <dofs> <parts>
 # Requires: PYFRM_MESHES_CUBIC variable
-
 
 setup_cube_mesh(){
 

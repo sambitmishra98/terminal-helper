@@ -144,10 +144,12 @@ EOF
 setup_worktree_testbed() {
     local RED='\e[31m' GREEN='\e[32m' YELLOW='\e[33m' BLUE='\e[34m' NC='\e[0m'
 
-    local caseloc=$(basename "$PWD")
+    local caseloc
+    caseloc=$(basename "$PWD")
 
     # Save the current directory
-    local current_dir=$(pwd)
+    local current_dir
+    current_dir=$(pwd)
 
 
     # Ensure we’re in testbed-<casename>

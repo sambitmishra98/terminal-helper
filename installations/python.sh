@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -eu
 
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––
 # 0. User-configurable paths & jobs
