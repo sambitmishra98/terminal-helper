@@ -13,6 +13,5 @@ fi
 REPO_ROOT=$1
 
 # ── 2. core workspace bootstrap ───────────────────────────────────────────────
-source "$REPO_ROOT/profession/sambitmishra98_pyfr/setup-worktree.sh"
-source "$REPO_ROOT/profession/sambitmishra98_pyfr/setup-venv.sh"
-
+source "$REPO_ROOT/lib/projects/pyfr/setup-worktree.sh"
+source "$REPO_ROOT/lib/projects/pyfr/setup-venv.sh"
