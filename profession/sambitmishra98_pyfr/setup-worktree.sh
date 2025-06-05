@@ -59,7 +59,7 @@ EOF
   fi
 
 
-  cd ${SAMBITMISHRA98_PYFR}/develop
+  cd "${SAMBITMISHRA98_PYFR}/develop" || return 1
 
   #── Ensure we’re in a Git repository ─────
   if ! git rev-parse --is-inside-work-tree &>/dev/null; then
@@ -108,7 +108,7 @@ EOF
   #── 3) Merge each feature in order ──────
   echo
   echo -e "${BLUE}Merging in feature branches:${NC}"
-  pushd "$wt_path" >/dev/null
+  pushd "$wt_path" >/dev/null || return 1
   for feat in "${add_branches[@]}"; do
     echo -e "  ${YELLOW}→${NC} Merging ${feat} into ${base_branch}…"
     git fetch origin "$feat"
@@ -128,14 +128,14 @@ EOF
 
 
   done
-  popd >/dev/null
+  popd >/dev/null || return 1
 
   #── Done ────────────────────────────────
   echo
   echo -e "${GREEN}✅ ${base_branch} is now: ${trunk_branch} + ${add_branches[*]}${NC}"
   source "${VENVS}/${base_branch}/bin/activate"
 
-  cd ${SAMBITMISHRA98_PYFR}/${base_branch}
+  cd "${SAMBITMISHRA98_PYFR}/${base_branch}" || return 1
 
   python3 setup.py develop
 
@@ -179,7 +179,7 @@ setup_worktree_testbed() {
 
     # Invoke setup_worktree and cd into testbed
     setup_worktree --base "worktree-${casename}" --trunk develop "${add_args[@]}"
-    cd $current_dir
+    cd "$current_dir" || return 1
 
 
     # Grab the venv name (e.g. “worktree-c200”)
