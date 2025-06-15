@@ -43,14 +43,14 @@ add_installation_to_path() {
         if [ $QUIET -eq 0 ]; then
             # Front-fill with spaces so all names are aligned
             local name_length=${#name}
-            local spaces=$(( 15 - name_length ))
+            local spaces=$(( 20 - name_length ))
             local spaces_string
             spaces_string=$(printf "%${spaces}s" " ")
             spaces_string=${spaces_string// / }
 
             # echo -e "\e[32mAdded path to ${spaces_string} ${version} \e[0m"
             # Fix bug above
-            echo -e "\e[32mAdded path to ${name} ${spaces_string} ${version} \e[0m"
+            echo -e "\e[32m+ ${spaces_string} ${name} ${version} \e[0m"
         fi
     fi 
 }

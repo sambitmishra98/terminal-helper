@@ -4,19 +4,19 @@
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––
 set_ascent_version() {
     # You can change this to a release tag (e.g. "v0.9.3") if desired
-    ASCENT_REF="develop"
-    echo "[INFO] Building Ascent from branch/tag: ${ASCENT_REF}"
+    ASCENT_VER="develop"
+    echo "[INFO] Building Ascent from branch/tag: ${ASCENT_VER}"
 }
 
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––
 # 2. Clone the Ascent repository (with submodules)
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––
 download_ascent() {
-    local dest="${DOWNLOADS:-$HOME/downloads}/ascent/${ASCENT_REF}"
+    local dest="${DOWNLOADS}/ascent/${ASCENT_VER}"
     echo "[INFO] Cloning Ascent into $dest"
     rm -rf "$dest"
     mkdir -p "$(dirname "$dest")"
-    git clone --recursive --branch "$ASCENT_REF" https://github.com/Alpine-DAV/ascent.git "$dest"
+    git clone --recursive --branch "$ASCENT_VER" https://github.com/Alpine-DAV/ascent.git "$dest"
     echo "[OK] Ascent source ready"
 }
 
@@ -36,8 +36,14 @@ prepare_environment() {
 # 4. Build (and install) Ascent with MPI support
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––
 build_ascent() {
-    local src="${DOWNLOADS:-$HOME/downloads}/ascent/${ASCENT_REF}"
-    local prefix="${INSTALLS:-$HOME/installs}/ascent/${ASCENT_REF}"
+    # If The required UCX and OMPI are not found, error out
+    if [ -z "${UCX_VER}" ] || [ -z "${OMPI_VER}" ]; then
+        echo "[ERROR] UCX or OpenMPI version not set!"
+        return 1
+    fi
+
+    local src="${DOWNLOADS}/ascent/${ASCENT_VER}"
+    local prefix="${INSTALLS}/ascent/${ASCENT_VER}_cuda_ucx-${UCX_VER}_ompi-${OMPI_VER}"
     local log="$src/build_ascent.log"
 
     echo "[INFO] Creating install prefix at $prefix"
@@ -57,7 +63,7 @@ build_ascent() {
 # 5. Verify the Ascent MPI library and tell PyFR where it is
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––
 check_ascent() {
-    local prefix="${INSTALLS:-$HOME/installs}/ascent/${ASCENT_REF}"
+    local prefix="${INSTALLS:-$HOME/installs}/ascent/${ASCENT_VER}"
     local lib="$prefix/lib/libascent_mpi.so"
 
     echo "[INFO] Verifying Ascent MPI library at $lib"
@@ -73,7 +79,7 @@ check_ascent() {
 }
 
 #— Add Ascent and its dependencies to your environment —#
-# export ASCENT_REF="develop"
-# add_installation_to_path "conduit-vx.x.x" "" "${INSTALLS}/ascent/${ASCENT_REF}/scripts/build_ascent/install/"
-# add_installation_to_path "vtk-m-vx.x.x"   "" "${INSTALLS}/ascent/${ASCENT_REF}/scripts/build_ascent/install/"
+# export ASCENT_VER="develop"
+# add_installation_to_path "conduit-vx.x.x" "" "${INSTALLS}/ascent/${ASCENT_VER}/scripts/build_ascent/install/"
+# add_installation_to_path "vtk-m-vx.x.x"   "" "${INSTALLS}/ascent/${ASCENT_VER}/scripts/build_ascent/install/"
 # export PYFR_ASCENT_MPI_LIBRARY_PATH="${ASCENT_INSTALLATION_LOCATION}/lib/libascent_mpi.so"

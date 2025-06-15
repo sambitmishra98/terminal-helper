@@ -19,6 +19,11 @@ setup_pyfr_venv ()
         deactivate
     fi
 
+    # If ucx and mpi are not available in terminal, then error
+    if ! command -v ucx_info &>/dev/null || ! command -v mpiexec &>/dev/null; then
+        echo -e "${C_RED}>>> UCX or MPI not found in PATH. Please ensure they are installed and available.${C_RESET}"
+        return 1
+    fi
 
     local VENV_TYPE="$1"
     local VENV_NAME="$2"
