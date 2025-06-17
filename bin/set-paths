@@ -32,6 +32,8 @@ set_paths()
     export DOWNLOADS="$LOCAL/downloads/"
     export EXTRACTS="$LOCAL/extracts/"
     export INSTALLS="$LOCAL/installs/"
+
+    source /scratch/.github/sambitmishra98/terminal-helper/lib/common/add_installation.sh
 }
 
 check_paths()

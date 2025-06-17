@@ -7,7 +7,7 @@
 #         clone_openmpi_git master   # bleeding-edge
 ###############################################################################
 clone_openmpi_git() {
-    local tag="${1:-v5.0.7}"
+    local tag="${1:-main}"
     export OMPI_VER="${tag#v}"
     echo "[INFO] Cloning Open-MPI $tag (=> OMPI_VER=$OMPI_VER)"
 
@@ -50,29 +50,70 @@ autogen_openmpi_git() {
 # configure_openmpi_git : CUDA-aware + UCX + MCA-DSO + Sphinx docs
 ###############################################################################
 configure_openmpi_git() {
+
+    # ---- flag parsing -------------------------------------------------------
+    local CUDA_FLAG=""   CUDA_TAG=""      # CUDA_TAG/ROCM_TAG used for prefix
+    local ROCM_FLAG=""   ROCM_TAG=""
+    local UCX_FLAG=""    UCX_VER="master" # ← default “master”
+
+    while (( $# )); do
+        case "$1" in
+            cuda)
+                CUDA_FLAG="--with-cuda=/usr/local/cuda"
+                CUDA_TAG="cuda"
+                ;;
+            rocm|hip)
+                ROCM_FLAG="--with-rocm=/opt/rocm"
+                ROCM_TAG="rocm"
+                ;;
+            ucx)
+                shift
+                UCX_VER="${1:-master}"
+                UCX_FLAG="--with-ucx=$INSTALLS/ucx/$UCX_VER"
+                ;;
+            *)
+                echo "[WARN] Unknown argument '$1' ignored."
+                ;;
+        esac
+        shift
+    done
+
+    if [ -z "$CUDA_FLAG$ROCM_FLAG$UCX_FLAG" ]; then
+        echo "[ERROR] No valid flags set. Specify at least one of cuda / rocm / ucx."
+        return 1
+    fi
+
+    # ---- derive the install prefix -----------------------------------------
+    local PREFIX_PARTS=()
+    [ -n "$CUDA_TAG" ] && PREFIX_PARTS+=("$CUDA_TAG")
+    [ -n "$ROCM_TAG" ] && PREFIX_PARTS+=("$ROCM_TAG")
+    [ -n "$UCX_FLAG" ] && PREFIX_PARTS+=("ucx${UCX_VER}")
+    local PREFIX_NAME="ompi-$(IFS=-; echo "${PREFIX_PARTS[*]}")"
+    local PREFIX_PATH="$INSTALLS/${PREFIX_NAME}/${OMPI_VER}"
+
+    echo "[INFO] Final prefix → $PREFIX_PATH"
+    echo "[INFO] Flags       → $CUDA_FLAG $ROCM_FLAG $UCX_FLAG"
+
+    # ---- run configure ------------------------------------------------------
     local src="$EXTRACTS/openmpi/$OMPI_VER/openmpi-$OMPI_VER"
     local log="$src/build-configure.log"
     cd "$src" || { echo "[ERROR] Cannot cd to $src"; return 1; }
 
-    ensure_docs_venv                        # ← new line
+    ensure_docs_venv
 
-    echo "[INFO] Configuring Open-MPI $OMPI_VER (UCX=$UCX_VER, MCA-DSO, docs) ..."
     ./configure \
-        --prefix="$INSTALLS/ompi-cuda/$OMPI_VER" \
-        --with-ucx="$INSTALLS/ucx-cuda/$UCX_VER" \
-        --with-cuda=/usr/local/cuda \
+        --prefix="$PREFIX_PATH" \
+        $UCX_FLAG \
+        $CUDA_FLAG \
+        $ROCM_FLAG \
         --enable-mca-dso=all \
         --enable-sphinx \
         --with-sphinx-build="$SPHINX_BUILD" \
         --enable-make-install-docs \
-        --enable-shared \
-        2>&1 | tee "$log"
+        --enable-shared 2>&1 | tee "$log"
 
-    grep -q "UCX support.*yes" "$log" && grep -q "CUDA.*yes" "$log" \
-        && echo "[OK] configure saw CUDA + UCX" \
-        || echo "[WARN] CUDA/UCX missing – see $log"
+    grep -q "error" "$log" && echo "[WARN] configure reported errors – inspect $log"
 }
-
 ###############################################################################
 # make_openmpi_git : parallel build (tunable)
 ###############################################################################
