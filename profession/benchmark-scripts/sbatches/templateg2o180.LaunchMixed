@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+#SBATCH -J "lb"
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --partition=cpu
+#SBATCH --time=1-00:00:00
+#SBATCH --output=run-%j.out
+#SBATCH --array=10,15,20,25,30,35,40,41-79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,105,110,115,120
+
+# Location: $SAMBITMISHRA98/terminal-helper/profession/benchmark-scripts/sbatches/template.Launch-cpu
+
+. ~/.bashrc
+
+source /scratch/user/u.sm121949/EFFORTS/mpi-env.sh
+
+tstart=$(date +%s)
+
+exec="/scratch/user/u.sm121949/.github/sambitmishra98/terminal-helper/profession/benchmark-scripts/sbatches/mixed.sh"
+mesh=/scratch/user/u.sm121949/EFFORTS/benchmark/testbed-tgv/meshes/etype-hex_order-6_dof-40000000.pyfrm
+cfg=/scratch/user/u.sm121949/EFFORTS/benchmark/testbed-tgv/Mixed/lb-cam.ini
+
+export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+export OMP_PLACES=cores
+
+i=$SLURM_ARRAY_TASK_ID
+
+# create an isolated work-dir and jump in
+workdir="run_${i}"
+mkdir -p "${workdir}"   || { echo "cannot mkdir ${workdir}"; exit 1; }
+cd       "${workdir}"   || exit 1
+
+#                  # Copy the mesh and cfg files into the workdir
+#                  cp ${mesh} . || { echo "cannot copy ${mesh}"; exit 1; }
+#                  cp ${cfg}  . || { echo "cannot copy ${cfg}"; exit 1; }
+#                  
+#                  PART="pyfr partition add -f -pmetis \
+#                                          --popt ufactor:1  --popt ncuts:5 --popt niter:20 \
+#                                          ./*.pyfrm $i*1:10*11:$i*1:10*11 lb" ; echo $PART ; eval $PART
+#                  CMD="mpirun -n $SLURM_NTASKS --map-by l3cache:PE=$SLURM_CPUS_PER_TASK \
+#                                               --report-bindings $exec ./*.pyfrm ./lb-cam.ini"
+#                  echo $CMD
+#                  eval $CMD
+
+# dump stats straight into this directory
+# Append config and stats to a single file for easier parsing later
+soln="./lb-cam.pyfrs"
+opfile="../${i}-cam.txt"
+/scratch/user/u.sm121949/.installations/HDF5/1.14.6/bin/h5dump -d /config ${soln} >  ${opfile}
+/scratch/user/u.sm121949/.installations/HDF5/1.14.6/bin/h5dump -d /stats  ${soln} >> ${opfile}
+
+echo -e " -----------------------------------------------------------"
+echo -e "Preprocessing complete in $(($(date +%s) - tstart)) seconds."
+echo -e " -----------------------------------------------------------"

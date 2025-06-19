@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#SBATCH -J "Array-run"
+#SBATCH -J "array-run"
 #SBATCH --nodes=1
 #SBATCH --ntasks=24
 #SBATCH --cpus-per-task=8
@@ -8,7 +8,7 @@
 #SBATCH --partition=gpu
 #SBATCH --time=1-00:00:00
 #SBATCH --output=run-%j.out
-#SBATCH --nodelist=lg09
+#SBATCH --array=51-110
 
 # Location: $SAMBITMISHRA98/terminal-helper/profession/benchmark-scripts/sbatches/template.Launch-cpu
 
@@ -19,28 +19,35 @@ source /scratch/user/u.sm121949/EFFORTS/mpi-env.sh
 tstart=$(date +%s)
 
 exec="/scratch/user/u.sm121949/.github/sambitmishra98/terminal-helper/profession/benchmark-scripts/sbatches/mixed.sh"
-mesh=$1
-cfg=$2
+mesh=/scratch/user/u.sm121949/EFFORTS/benchmark/testbed-tgv/meshes/etype-hex_order-6_dof-160000000.pyfrm
+cfg=/scratch/user/u.sm121949/EFFORTS/benchmark/testbed-tgv/Mixed/lb.ini
 
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 export OMP_PLACES=cores
 
-for i in 71 72 73 74 86 87 88 89 91 92 93 94 95 96 97 98 99 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119
-do
+i=$SLURM_ARRAY_TASK_ID
+
+# create an isolated work-dir and jump in
+workdir="run_${i}"
+mkdir -p "${workdir}"   || { echo "cannot mkdir ${workdir}"; exit 1; }
+cd       "${workdir}"   || exit 1
+
+# Copy the mesh and cfg files into the workdir
+cp ${mesh} . || { echo "cannot copy ${mesh}"; exit 1; }
+cp ${cfg}  . || { echo "cannot copy ${cfg}"; exit 1; }
 
 PART="pyfr partition add -f -pmetis \
                         --popt ufactor:1  --popt ncuts:5 --popt niter:20 \
-                        $mesh $i*1:10*23 lb" ; echo $PART ; eval $PART
+                        ./*.pyfrm $i*1:10*23 lb" ; echo $PART ; eval $PART
 CMD="mpirun -n $SLURM_NTASKS \
             --map-by l3cache:PE=$SLURM_CPUS_PER_TASK \
             --bind-to core \
-            --report-bindings $exec $mesh $cfg"
+            --report-bindings $exec ./*.pyfrm ./*.ini"
 echo $CMD
 eval $CMD
 
-    /scratch/user/u.sm121949/.installations/HDF5/1.14.6/bin/h5dump -d /stats /scratch/user/u.sm121949/EFFORTS/benchmark/testbed-tgv/Mixed/*.pyfrs > $i.txt
-
-done
+# dump stats straight into this directory
+/scratch/user/u.sm121949/.installations/HDF5/1.14.6/bin/h5dump -d /stats ./*.pyfrs > ../"${i}.txt"
 
 
 echo -e " -----------------------------------------------------------"
