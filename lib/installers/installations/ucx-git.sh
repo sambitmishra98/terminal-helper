@@ -63,7 +63,7 @@ autogen_ucx_git() {
 ###############################################################################
 # 2. configure_ucx_git : ./contrib/configure-release with CUDA & verbs
 ###############################################################################
-configure_ucx_git() {
+configure_cuda_ucx_git() {
     local src="$EXTRACTS/ucx/$UCX_VER/ucx-$UCX_VER"
     local log="$src/build-configure.log"
 
@@ -86,6 +86,57 @@ configure_ucx_git() {
         echo "[OK] Configure found CUDA + MLX5 support" \
       || echo "[WARN] Check $log – expected CUDA/MLX5 flags not detected"
 }
+
+configure_rocm_ucx_git() {
+    local src="$EXTRACTS/ucx/$UCX_VER/ucx-$UCX_VER"
+    local log="$src/build-configure.log"
+
+    cd "$src" || { echo "[ERROR] Cannot cd to $src"; return 1; }
+
+    echo "[INFO] Configuring UCX $UCX_VER for ROCM & HDR-IB ..."
+    ./contrib/configure-release \
+        --prefix="$INSTALLS/ucx-rocm/$UCX_VER" \
+        --enable-shared                \
+        --enable-cma                   \
+        --enable-mt                    \
+        --with-rocm=/opt/rocm           \
+        --with-verbs                   \
+        --with-rc --with-dc            \
+        --with-mlx5-dv                 \
+        2>&1 | tee "$log"
+
+}
+
+
+configure_mixed_ucx_git() {
+    local src="$EXTRACTS/ucx/$UCX_VER/ucx-$UCX_VER"
+    local pre="$INSTALLS/ucx-mixed/$UCX_VER"
+    local log="$src/build-configure.log"
+
+    cd "$src" || { echo "[ERROR] Cannot cd to $src"; return 1; }
+
+    echo "[INFO] Configuring UCX $UCX_VER for CUDA *and* ROCm ..."
+    ./contrib/configure-release \
+        --prefix="$pre"               \
+        --enable-shared               \
+        --enable-mt                   \
+        --with-cuda=/usr/local/cuda   \
+        --with-rocm=/opt/rocm         \
+        --with-verbs                  \
+        --with-rc --with-dc           \
+        --with-mlx5dv --disable-debug \
+        2>&1 | tee "$log"
+
+    # quick sanity check: did both GPUs register?
+    grep -E "CUDA.*yes"  "$log" >/dev/null && \
+    grep -E "ROCm.*yes"  "$log" >/dev/null && \
+        echo "[OK] Configure found CUDA *and* ROCm support" \
+      || { echo "[WARN] One of the GPU back-ends is missing – inspect $log"; }
+}
+
+
+
+
 
 ###############################################################################
 # 3. make_ucx_git : compile with full parallelism
@@ -121,6 +172,47 @@ install_ucx_git() {
         && echo "[OK] Installation succeeded" \
         || { echo "[ERROR] libuct.so missing – see $log"; return 1; }
 }
+
+install_rocm_ucx_git() {
+    local src="$EXTRACTS/ucx/$UCX_VER/ucx-$UCX_VER"
+    local log="$src/build-install.log"
+
+    cd "$src" || { echo "[ERROR] Cannot cd to $src"; return 1; }
+
+    echo "[INFO] Installing UCX to $INSTALLS/ucx-rocm/$UCX_VER ..."
+    make install 2>&1 | tee "$log"
+
+    [ -f "$INSTALLS/ucx-rocm/$UCX_VER/lib/libuct.so" ] \
+        && echo "[OK] Installation succeeded" \
+        || { echo "[ERROR] libuct.so missing – see $log"; return 1; }
+}
+
+###############################################################################
+# install_mixed_ucx_git : make && make install for the mixed build
+###############################################################################
+make_install_mixed_ucx_git() {
+    local src="$EXTRACTS/ucx/$UCX_VER/ucx-$UCX_VER"
+    local pre="$INSTALLS/ucx-mixed/$UCX_VER"
+    local log="$src/build-install.log"
+
+    cd "$src" || { echo "[ERROR] Cannot cd to $src"; return 1; }
+
+    echo "[INFO] Building UCX (mixed) ..."
+    make clean        2>&1
+    make -j$(nproc) 2>&1 | tee "$log"
+
+    echo "[INFO] Installing UCX to $pre ..."
+    make install 2>&1 | tee -a "$log"
+
+    # post-install validation: list GPU transports
+    if "$pre/bin/ucx_info" -d | grep -qE "(cuda|rocm)_ipc"; then
+        echo "[OK] Mixed UCX install succeeded (CUDA + ROCm providers present)"
+    else
+        echo "[ERROR] ucx_info did not list both GPU providers – check $log"
+        return 1
+    fi
+}
+
 
 check_ucx_git() {
     local src="$EXTRACTS/ucx/$UCX_VER/ucx-$UCX_VER"

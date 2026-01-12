@@ -43,7 +43,7 @@ build_ascent() {
     fi
 
     local src="${DOWNLOADS}/ascent/${ASCENT_VER}"
-    local prefix="${INSTALLS}/ascent/${ASCENT_VER}_cuda_ucx-${UCX_VER}_ompi-${OMPI_VER}"
+    local prefix="${INSTALLS}/ascent/${ASCENT_VER}_rocm_ucx-${UCX_VER}_ompi-${OMPI_VER}"
     local log="$src/build_ascent.log"
 
     echo "[INFO] Creating install prefix at $prefix"

@@ -108,12 +108,34 @@ configure_openmpi_git() {
         $ROCM_FLAG \
         --enable-mca-dso=all \
         --enable-sphinx \
-        --with-sphinx-build="$SPHINX_BUILD" \
-        --enable-make-install-docs \
         --enable-shared 2>&1 | tee "$log"
 
     grep -q "error" "$log" && echo "[WARN] configure reported errors – inspect $log"
 }
+
+
+configure_ompi_mixed_git() {
+    local src="$EXTRACTS/openmpi/$OMPI_VER/openmpi-$OMPI_VER"
+    local pre="$INSTALLS/ompi-mixed/$OMPI_VER"
+    local ucx="$INSTALLS/ucx-mixed/$UCX_VER"
+
+    echo "[INFO] Configure OpenMPI $OMPI_VER → $pre (UCX=$ucx)"
+    cd "$src" || { echo "[ERR] cd $src"; return 1; }
+
+    ensure_docs_venv
+
+    ./configure \
+        --prefix="$pre" \
+        --with-ucx="$ucx" --with-cuda=/usr/local/cuda --with-rocm=/opt/rocm \
+        --with-slurm \
+        --enable-mca-dso=all \
+        --enable-mt          \
+        --enable-sphinx      \
+        --enable-shared      \
+        --disable-debug      \
+        2>&1 | tee "$src/build-configure.log"
+}
+
 ###############################################################################
 # make_openmpi_git : parallel build (tunable)
 ###############################################################################
@@ -123,6 +145,8 @@ make_openmpi_git() {
     cd "$src" || { echo "[ERROR] Cannot cd to $src"; return 1; }
 
     ensure_docs_venv                        # ← new line
+
+    make clean
 
     local jobs="${OMPI_MAKE_JOBS:-$(nproc)}"
     echo "[INFO] Building with -j${jobs} ..."
@@ -169,7 +193,21 @@ install_openmpi_git() {
 
     echo "[INFO] Installing ..."
     make install 2>&1 | tee "$log"
-    [ -x "$INSTALLS/ompi-cuda/$OMPI_VER/bin/mpicc" ] && echo "[OK] install done" \
+    [ -x "$INSTALLS/ompi-rocm/$OMPI_VER/bin/mpicc" ] && echo "[OK] install done" \
+        || { echo "[ERROR] mpicc missing – see $log"; return 1; }
+
+}
+
+install_openmpi_mixed_git() {
+    local src="$EXTRACTS/openmpi/$OMPI_VER/openmpi-$OMPI_VER"
+    local log="$src/build-install.log"
+    cd "$src" || { echo "[ERROR] Cannot cd to $src"; return 1; }
+
+    ensure_docs_venv                        # ← new line
+
+    echo "[INFO] Installing ..."
+    make install 2>&1 | tee "$log"
+    [ -x "$INSTALLS/ompi-mixed/$OMPI_VER/bin/mpicc" ] && echo "[OK] install done" \
         || { echo "[ERROR] mpicc missing – see $log"; return 1; }
 
 }

@@ -3,7 +3,7 @@
 source $SAMBITMISHRA98/terminal-helper/lib/common/add_installation.sh
 
 # BASICS
-add_installation_to_path cuda ""      /usr/local/
+add_installation_to_path cuda-12.6 ""      /usr/local/
 add_installation_to_path gcc  12.3.0  $SCRATCH/.local-spitfire/pkg/
 
 # MPI
