@@ -1,5 +1,4 @@
-# "Partially-averaged Navier-Stokes simulations of turbulence within a high-order flux reconstruction framework", https://doi.org/10.1016/j.jcp.2022.110992
-y-normalised,U-normalised
+x,y
 -2.0,0.037071109374999994
 -1.995995995995996,0.037155686956521744
 -1.991991991991992,0.037278297520661155
