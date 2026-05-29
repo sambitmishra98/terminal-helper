@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # Helper: bootstrap a PyFR virtual environment and clone
 # Usage: source setup-venv.sh then call setup_pyfr_venv <type> <name>
-# Requires: VENVS and SAMBITMISHRA98_PYFR variables
+# Requires: SAMBITMISHRA98_PYFR and SAMBITMISHRA98_PYFR_VENVS variables
 
 ###############################################################################
 # setup_pyfr_venv <venv-type> <venv-name>
 # Creates (or re-uses) a Python virtual-environment and a *matching* PyFR clone
 # under:
-#   $VENVS/<venv-type>-<venv-name>
-#   $SAMBITMISHRA98_PYFR/<venv-type>-<venv-name>
+#   $SAMBITMISHRA98_PYFR_VENVS/<venv-name>
+#   $SAMBITMISHRA98_PYFR/<venv-name>
 ###############################################################################
 
 setup_pyfr_venv ()
@@ -43,11 +43,11 @@ setup_pyfr_venv ()
     fi
 
     # --- path definitions ---------------------------------------------------
-    : "${VENVS:?Environment variable VENVS not set}"
     : "${SAMBITMISHRA98_PYFR:?Environment variable SAMBITMISHRA98_PYFR not set}"
+    : "${SAMBITMISHRA98_PYFR_VENVS:?Environment variable SAMBITMISHRA98_PYFR_VENVS not set}"
 
-    local venv_dir="${VENVS}/${VENV_TYPE}-${VENV_NAME}"
-    local pyfr_dir="${SAMBITMISHRA98_PYFR}/${VENV_TYPE}-${VENV_NAME}"
+    local venv_dir="${SAMBITMISHRA98_PYFR_VENVS}${VENV_NAME}/"
+    local pyfr_dir="${SAMBITMISHRA98_PYFR}${VENV_NAME}/"
 
     echo -e "${C_CYAN}=== Pre-flight check =======================================${C_RESET}"
     # Virtual-env directory check
@@ -89,7 +89,7 @@ setup_pyfr_venv ()
     source "${venv_dir}/bin/activate"
 
     echo -e "${C_CYAN}>>> Boot-strapping pip + core deps${C_RESET}"
-    python -m pip install --upgrade pip        &&
+    python -m pip install --upgrade pip setuptools wheel &&
     python -m pip install --no-cache-dir mpi4py &&
     python -m pip install pyfr setuptools       &&
     python -m pip uninstall -y pyfr             || {
@@ -109,11 +109,11 @@ setup_pyfr_venv ()
     fi
 
     # Build in editable/develop mode
-    echo -e "${C_CYAN}>>> Building PyFR in-place (python setup.py develop)${C_RESET}"
-    ( cd "${pyfr_dir}" && python setup.py develop ) \
+    echo -e "${C_CYAN}>>> Building PyFR in-place (pip install -e .)${C_RESET}"
+    ( cd "${pyfr_dir}" && python -m pip install -e . ) \
         || { echo -e "${C_RED}PyFR develop install failed${C_RESET}"; return 1; }
 
-    echo -e "${C_GREEN}=== PyFR virtual-env '${VENV_TYPE}-${VENV_NAME}' ready${C_RESET}"
+    echo -e "${C_GREEN}=== PyFR virtual-env '${VENV_NAME}' ready${C_RESET}"
 }
 
 ###############################################################################
@@ -158,7 +158,7 @@ setup_pyfr_venv_with_deps () {
 
     for dep in "${deps[@]}"; do
         # ensure the dependent feature branch is clean / up-to-date
-        ( cd "${SAMBITMISHRA98_PYFR}/${vtype}-${dep}" 2>/dev/null && \
+        ( cd "${SAMBITMISHRA98_PYFR}${dep}/" 2>/dev/null && \
           update_feature_branch "feature/${dep}" ) || true
         setup_pyfr_venv "$vtype" "$dep"            || return 1
     done
