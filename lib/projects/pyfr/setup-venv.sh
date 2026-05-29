@@ -5,7 +5,7 @@
 
 ###############################################################################
 # setup_pyfr_venv <venv-type> <venv-name>
-# Creates (or re-uses) a Python virtual-environment and a *matching* PyFR clone
+# Creates a Python virtual-environment and a *matching* PyFR clone
 # under:
 #   $SAMBITMISHRA98_PYFR_VENVS/<venv-name>
 #   $SAMBITMISHRA98_PYFR/<venv-name>
@@ -17,12 +17,6 @@ setup_pyfr_venv ()
     if [[ -n "${VIRTUAL_ENV:-}" ]]; then
         echo -e "${C_YELLOW}>>> Deactivating existing virtual-env${C_RESET}"
         deactivate
-    fi
-
-    # If ucx and mpi are not available in terminal, then error
-    if ! command -v ucx_info &>/dev/null || ! command -v mpiexec &>/dev/null; then
-        echo -e "${C_RED}>>> UCX or MPI not found in PATH. Please ensure they are installed and available.${C_RESET}"
-        return 1
     fi
 
     local VENV_TYPE="$1"
@@ -49,68 +43,77 @@ setup_pyfr_venv ()
     local venv_dir="${SAMBITMISHRA98_PYFR_VENVS}${VENV_NAME}/"
     local pyfr_dir="${SAMBITMISHRA98_PYFR}${VENV_NAME}/"
 
-    echo -e "${C_CYAN}=== Pre-flight check =======================================${C_RESET}"
-    # Virtual-env directory check
-    if [[ -d "${venv_dir}" ]]; then
-        echo -e "${C_YELLOW}Virtual-env exists → ${venv_dir}${C_RESET}"
-        read -rp "    Re-use it? [y/N] " reply
-        if [[ ! "$reply" =~ ^[Yy]$ ]]; then
-            echo -e "${C_RED}Aborting; existing venv rejected by user.${C_RESET}"
-            return 1
-        fi
+    # --- toolchain checks ---------------------------------------------------
+    if ! command -v python3 &>/dev/null; then
+        echo -e "${C_RED}>>> python3 not found in PATH${C_RESET}"
+        return 1
+    fi
+    if ! command -v mpiexec &>/dev/null || ! command -v mpicc &>/dev/null; then
+        echo -e "${C_RED}>>> MPI not found in PATH (mpiexec/mpicc required)${C_RESET}"
+        return 1
+    fi
+    if command -v ucx_info &>/dev/null; then
+        echo -e "${C_GREEN}>>> UCX available${C_RESET}"
     else
-        echo -e "${C_GREEN}Virtual-env will be created → ${venv_dir}${C_RESET}"
+        echo -e "${C_YELLOW}>>> UCX not found; continuing without UCX${C_RESET}"
     fi
 
-    # PyFR directory check
-    if [[ -d "${pyfr_dir}" ]]; then
-        echo -e "${C_YELLOW}PyFR clone exists → ${pyfr_dir}${C_RESET}"
-        read -rp "    Re-use it? [y/N] " reply
-        if [[ ! "$reply" =~ ^[Yy]$ ]]; then
-            echo -e "${C_RED}Aborting; existing PyFR clone rejected by user.${C_RESET}"
-            return 1
-        fi
-    else
-        echo -e "${C_GREEN}PyFR repo will be cloned → ${pyfr_dir}${C_RESET}"
+    if ! python3 - <<'PY'
+import sys
+sys.exit(0 if sys.version_info >= (3, 12) else 1)
+PY
+    then
+        echo -e "${C_RED}>>> Python 3.12+ is required${C_RESET}"
+        return 1
     fi
+
+    echo -e "${C_CYAN}=== Pre-flight check =======================================${C_RESET}"
+    # Virtual-env directory check
+    if [[ -e "${venv_dir}" ]]; then
+        echo -e "${C_RED}Virtual-env already exists → ${venv_dir}${C_RESET}"
+        return 1
+    fi
+    echo -e "${C_GREEN}Virtual-env will be created → ${venv_dir}${C_RESET}"
+
+    # PyFR directory check
+    if [[ -e "${pyfr_dir}" ]]; then
+        echo -e "${C_RED}PyFR clone already exists → ${pyfr_dir}${C_RESET}"
+        return 1
+    fi
+    echo -e "${C_GREEN}PyFR repo will be cloned → ${pyfr_dir}${C_RESET}"
     echo -e "${C_CYAN}===========================================================${C_RESET}"
 
     # ------------------------------------------------------------------------
     # 1. Create / activate virtual-env
     # ------------------------------------------------------------------------
-    if [[ ! -d "${venv_dir}" ]]; then
-        echo -e "${C_CYAN}>>> Creating virtual-env${C_RESET}"
-        python3 -m venv "${venv_dir}" || { echo -e "${C_RED}venv creation failed${C_RESET}"; return 1; }
-    else
-        echo -e "${C_CYAN}>>> Re-using existing virtual-env${C_RESET}"
-    fi
+    echo -e "${C_CYAN}>>> Creating virtual-env${C_RESET}"
+    python3 -m venv "${venv_dir}" || { echo -e "${C_RED}venv creation failed${C_RESET}"; return 1; }
 
     # shellcheck disable=SC1090
     source "${venv_dir}/bin/activate"
 
-    echo -e "${C_CYAN}>>> Boot-strapping pip + core deps${C_RESET}"
-    python -m pip install --upgrade pip setuptools wheel &&
-    python -m pip install --no-cache-dir mpi4py &&
-    python -m pip install pyfr setuptools       &&
-    python -m pip uninstall -y pyfr             || {
-        echo -e "${C_RED}pip bootstrap failed${C_RESET}"
+    echo -e "${C_CYAN}>>> Upgrading venv tooling${C_RESET}"
+    python -m pip install --upgrade pip setuptools wheel || {
+        echo -e "${C_RED}pip tooling upgrade failed${C_RESET}"
+        return 1
+    }
+
+    echo -e "${C_CYAN}>>> Installing mpi4py from source${C_RESET}"
+    MPICC="${MPICC:-mpicc}" python -m pip install --no-cache-dir --no-binary=mpi4py mpi4py || {
+        echo -e "${C_RED}mpi4py install failed${C_RESET}"
         return 1
     }
 
     # ------------------------------------------------------------------------
     # 2. Clone / update PyFR working copy
     # ------------------------------------------------------------------------
-    if [[ ! -d "${pyfr_dir}" ]]; then
-        echo -e "${C_CYAN}>>> Cloning PyFR fork${C_RESET}"
-        git -C "${SAMBITMISHRA98_PYFR}" clone https://github.com/sambitmishra98/PyFR.git "${pyfr_dir}" \
-            || { echo -e "${C_RED}git clone failed${C_RESET}"; return 1; }
-    else
-        echo -e "${C_CYAN}>>> Using existing PyFR working copy${C_RESET}"
-    fi
+    echo -e "${C_CYAN}>>> Cloning PyFR fork${C_RESET}"
+    git clone --branch "${VENV_NAME}" --single-branch https://github.com/sambitmishra98/PyFR.git "${pyfr_dir}" \
+        || { echo -e "${C_RED}git clone failed${C_RESET}"; return 1; }
 
     # Build in editable/develop mode
     echo -e "${C_CYAN}>>> Building PyFR in-place (pip install -e .)${C_RESET}"
-    ( cd "${pyfr_dir}" && python -m pip install -e . ) \
+    ( cd "${pyfr_dir}" && python -m pip install --no-cache-dir -e . ) \
         || { echo -e "${C_RED}PyFR develop install failed${C_RESET}"; return 1; }
 
     echo -e "${C_GREEN}=== PyFR virtual-env '${VENV_NAME}' ready${C_RESET}"
