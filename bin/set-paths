@@ -35,6 +35,9 @@ set_paths()
     export PYFR_BRANCHES="${SAMBITMISHRA98}PyFR/"
     export SAMBITMISHRA98_PYFR="$PYFR_BRANCHES"
     export SAMBITMISHRA98_PYFR_DEVELOP="${SAMBITMISHRA98_PYFR}develop/"
+    export PYFR_VENVS="${VENVS}sambitmishra98/PyFR/"
+    export SAMBITMISHRA98_PYFR_VENVS="$PYFR_VENVS"
+    export SAMBITMISHRA98_PYFR_DEVELOP_VENV="${SAMBITMISHRA98_PYFR_VENVS}develop/"
     export LOCAL="$SCRATCH/.local/"
     export DOWNLOADS="$LOCAL/downloads/"
     export EXTRACTS="$LOCAL/extracts/"
@@ -46,7 +49,8 @@ set_paths()
 check_paths()
 {
     for path in "$EFFORTS" \
-                "$VENVS" \
+                "$VENVS" "$PYFR_VENVS" "$SAMBITMISHRA98_PYFR_VENVS" \
+                "$SAMBITMISHRA98_PYFR_DEVELOP_VENV" \
                 "$WORKSPACES" \
                 "$SUPPLEMENTARY" "$MESHES" "$PARTITIONS" \
                 "$GITHUB" "$SAMBITMISHRA98" \
@@ -65,7 +69,8 @@ create_paths()
 
     for path in "$SCRATCH" \
                 "$EFFORTS" \
-                "$VENVS" \
+                "$VENVS" "$PYFR_VENVS" "$SAMBITMISHRA98_PYFR_VENVS" \
+                "$SAMBITMISHRA98_PYFR_DEVELOP_VENV" \
                 "$WORKSPACES" \
                 "$SUPPLEMENTARY" "$MESHES" "$PARTITIONS" \
                 "$GITHUB" "$SAMBITMISHRA98" \
@@ -91,6 +96,9 @@ print_paths()
     echo -e "└─ SCRATCH:                            $SCRATCH"
     echo -e "   ├─ EFFORTS:                         $EFFORTS"
     echo -e "   ├─ VENVS:                           $VENVS"
+    echo -e "   │   └─ PYFR_VENVS:                  $PYFR_VENVS"
+    echo -e "   │       ├─ SAMBITMISHRA98_PYFR_VENVS: $SAMBITMISHRA98_PYFR_VENVS"
+    echo -e "   │       └─ SAMBITMISHRA98_PYFR_DEVELOP_VENV: $SAMBITMISHRA98_PYFR_DEVELOP_VENV"
     echo -e "   ├─ WORKSPACES:                      $WORKSPACES"
     echo -e "   ├─ SUPPLEMENTARY:                   $SUPPLEMENTARY"
     echo -e "   │   ├─ MESHES:                      $MESHES"
