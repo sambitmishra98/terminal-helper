@@ -1,3 +1,0 @@
-{
-  "error": "h5dump error: unable to open file \"try-2/pyfrss/cyl-imp-10.00.pyfrs\""
-}
