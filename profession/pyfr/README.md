@@ -1,6 +1,6 @@
 # PyFR helper scripts
 
-Small PyFR utilities for case-card generation and implicit-run diagnostics.
+Small PyFR utilities for case-card generation and run diagnostics.
 
 These scripts are intended for reusable analysis of PyFR runs. Large meshes,
 solution files, CSVs, logs, and generated `_case_card` outputs should remain
