@@ -67,3 +67,4 @@ scripts unless explicitly asked. Follow the standard workflow in
 - [PyFR branch layout](docs/pyfr-branch-layout.md)
 - [Large-file policy](docs/large-file-policy.md)
 - [Copilot workflow](docs/copilot-workflow.md)
+- [PyFR implicit case-card workflow](docs/pyfr-implicit-case-card.md)
