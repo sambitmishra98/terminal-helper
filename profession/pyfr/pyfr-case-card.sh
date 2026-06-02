@@ -6,9 +6,10 @@ case_dir=${1:-.}
 pyfrs=${2:-}
 mesh=${3:-}
 order=${4:-}
+NEWTON_MAX=${5:-}
 
 this_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-outdir="$case_dir/_pyfr_case_card"
+outdir="$case_dir/_case_card"
 mkdir -p "$outdir"
 
 if [[ -n "$pyfrs" ]]; then
