@@ -23,10 +23,15 @@ fi
 steps=$(find "$case_dir" -type f \( -name 'dtstats_fdw.csv' -o -name 'dtstats.csv' \) | head -1 || true)
 stages=$(find "$case_dir" -type f \( -name 'dtstats-stages.csv' -o -name 'dtstats_stages.csv' \) | head -1 || true)
 if [[ -n "$steps" ]]; then
+  extra=()
+  if [[ -n "$NEWTON_MAX" ]]; then
+    extra+=(--newton-max "$NEWTON_MAX")
+  fi
+
   if [[ -n "$stages" ]]; then
-    python "$this_dir/pyfr-implicit-csv-summary.py" --steps "$steps" --stages "$stages" --out "$outdir/csv_summary.md"
+    python "$this_dir/pyfr-implicit-csv-summary.py" --steps "$steps" --stages "$stages" "${extra[@]}" --out "$outdir/csv_summary.md"
   else
-    python "$this_dir/pyfr-implicit-csv-summary.py" --steps "$steps" --out "$outdir/csv_summary.md"
+    python "$this_dir/pyfr-implicit-csv-summary.py" --steps "$steps" "${extra[@]}" --out "$outdir/csv_summary.md"
   fi
 fi
 
